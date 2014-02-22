@@ -5,14 +5,24 @@ public class StoneBehavior : MonoBehaviour {
 	
 	private Material materialColored;
 
+	public float  FORCE_MULTIPLIER = 0.1f;
+	public float  FRICTION = .1f;
+
 	private float force;
-	private float spin;
 	private float inputStart;
+
+	private float startX;
+	private float startY;
+	private float startZ;
+
+	private bool  inMotion;
+	private bool  finished;
 
 	// Use this for initialization
 	void Start () 
 	{			
 		Reset ();
+		Debug.Log ("inMotion: " + inMotion);
 	}
 	
 	// Update is called once per frame
@@ -21,32 +31,55 @@ public class StoneBehavior : MonoBehaviour {
 		if (Application.platform == RuntimePlatform.WindowsEditor || 
 			Application.platform == RuntimePlatform.OSXEditor) 
 		{
-			CalculateClickPoints();
+			if (!inMotion)
+			{
+				CalculateClickPoints();
+			}
 		}
 		else
 		{
-			CalculateTouchPoints();
+			if (!inMotion)
+			{
+				CalculateTouchPoints();
+			}
 		}
 
-		if (force != 0 && spin != 0) 
+		if (!inMotion && force != 0) 
 		{
 			// Send the puck
 			rigidbody.AddForce(new Vector3(0, 0, force));
+			
+			inMotion = true;
 		}
+
+		ApplyFriction ();
 	}
 
 	void Reset()
-	{
-		//create a new material
-		materialColored = new Material(Shader.Find("Diffuse"));
-		materialColored.color = Color.red;
-		this.renderer.material = materialColored;
-		
+	{		
 		force = 0;
-		spin = 0;
+		inMotion = false;
+		finished = false;
+
+		startX = this.transform.position.x;
+		startY = this.transform.position.y;
+		startZ = this.transform.position.z;
 	}
 
+	void ApplyFriction()
+	{
 
+		
+		if (inMotion && rigidbody.velocity.z > 0) 
+		{
+			rigidbody.AddForce (new Vector3 (0, 0, FRICTION * -1));
+			if (rigidbody.velocity.z < 0.1)
+			{
+				rigidbody.velocity = new Vector3(0,0,0);
+				finished = true;
+			}
+		}
+	}
 
 	void CalculateClickPoints()
 	{
@@ -57,10 +90,6 @@ public class StoneBehavior : MonoBehaviour {
 			{
 				inputStart = Input.mousePosition.y;
 			}
-			else
-			{
-				inputStart = Input.mousePosition.x;
-			}
 		}
 		
 		if (Input.GetMouseButtonUp(0))
@@ -68,13 +97,8 @@ public class StoneBehavior : MonoBehaviour {
 			// calculate force first
 			if (force == 0)
 			{
-				force = Input.mousePosition.y - inputStart;
+				force = (Input.mousePosition.y - inputStart) * FORCE_MULTIPLIER;
 				Debug.Log("Setting force = " + force);
-			}
-			else // calculate spin
-			{
-				spin = Input.mousePosition.x - inputStart;
-				Debug.Log("Setting spin = " + spin);
 			}
 		}
 	}
@@ -92,10 +116,6 @@ public class StoneBehavior : MonoBehaviour {
 				{
 					inputStart = touchPoint.position.y;
 				}
-				else
-				{
-					inputStart = touchPoint.position.x;
-				}
 			}
 			
 			if (touchPoint.phase == TouchPhase.Ended)
@@ -105,11 +125,6 @@ public class StoneBehavior : MonoBehaviour {
 				{
 					force = touchPoint.position.y - inputStart;
 					Debug.Log("Setting force = " + force);
-				}
-				else // calculate spin
-				{
-					spin = touchPoint.position.x - inputStart;
-					Debug.Log("Setting spin = " + spin);
 				}
 			}
 		}
