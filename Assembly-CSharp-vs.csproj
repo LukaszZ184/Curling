@@ -51,6 +51,7 @@
      <Compile Include="Assets\PlaneInit.cs" />
      <Compile Include="Assets\StoneBehavior.cs" />
      <Compile Include="Assets\elementEnum.cs" />
+     <Compile Include="Assets\stoneTrigger.cs" />
  <Reference Include="Assembly-UnityScript-firstpass">
  <HintPath>Library\ScriptAssemblies\Assembly-UnityScript-firstpass.dll</HintPath>
  </Reference>

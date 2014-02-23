@@ -7,6 +7,8 @@ public class StoneBehavior : MonoBehaviour {
 
 	public float  FORCE_MULTIPLIER = 0.1f;
 	public float  FRICTION = .1f;
+	public GameObject prefab;
+//	public elementEnum myEnum;
 
 	private float force;
 	private float inputStart;
@@ -18,9 +20,13 @@ public class StoneBehavior : MonoBehaviour {
 	private bool  inMotion;
 	private bool  finished;
 
+
 	// Use this for initialization
 	void Start () 
 	{			
+		startX = 0.0004494066f;
+		startY = .1f;
+		startZ = -8.000008f;
 		Reset ();
 		Debug.Log ("inMotion: " + inMotion);
 	}
@@ -52,6 +58,17 @@ public class StoneBehavior : MonoBehaviour {
 			inMotion = true;
 		}
 
+		if (finished) 
+		{
+			//switch(elementEnum){
+			Vector3 vec = new Vector3(this.transform.position.x, this.transform.position.y, this.transform.position.z);
+			Instantiate ( prefab, vec, this.transform.rotation);
+			this.transform.position = new Vector3(0.0004494066f, .1f, -8.000008f);
+			//}
+			finished = false;
+			Reset ();
+		}
+
 		ApplyFriction ();
 	}
 
@@ -61,9 +78,7 @@ public class StoneBehavior : MonoBehaviour {
 		inMotion = false;
 		finished = false;
 
-		startX = this.transform.position.x;
-		startY = this.transform.position.y;
-		startZ = this.transform.position.z;
+		this.transform.position = new Vector3(startX, startY, startZ);
 	}
 
 	void ApplyFriction()
